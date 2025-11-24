@@ -1,4 +1,8 @@
 export interface Env {
-  MY_ENV_VARIABLE: string;
-  MY_OTHER_ENV_VARIABLE?: string;
+  OPENAI_API_KEY: string;
+  MYSQL_HOST: string;
+  MYSQL_PORT: number;
+  MYSQL_USER: string;
+  MYSQL_PASSWORD: string;
+  MYSQL_DB: string;
 }

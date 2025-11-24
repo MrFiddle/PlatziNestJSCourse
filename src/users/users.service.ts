@@ -1,63 +1,79 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [
-    { id: 1, name: 'John Doe', email: 'john.doe@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com' },
-  ];
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private dataSource: DataSource,
+  ) {}
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    const users = await this.userRepository.find();
+    return users;
   }
 
-  getUserById(id: number): User {
-    const position = this.findOne(id);
-    const user = this.users[position];
+  async getUserById(id: number): Promise<User> {
+    const user = await this.findOne(id);
     if (user.id === 1) {
       throw new ForbiddenException('Access to this user is forbidden');
     }
     return user;
   }
 
-  getUserByEmail(email: string): User | undefined {
-    return this.users.find((user) => user.email === email);
+  async getUserByEmail(email: string): Promise<User> {
+    const user = await this.findOneByEmail(email);
+    return user;
   }
 
-  create(userData: CreateUserDto): User {
-    const newUser: User = {
-      ...userData,
-      id: new Date().getTime(),
-    };
-    this.users.push(newUser);
-    return newUser;
+  async create(userData: CreateUserDto): Promise<User> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const newUser = await queryRunner.manager.save(User, userData);
+      await queryRunner.commitTransaction();
+      const { password, ...result } = newUser;
+      return result as User;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException('Failed to create user');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  update(id: number, userData: UpdateUserDto): User | undefined {
-    const position = this.findOne(id);
-    const user = this.users[position];
-    if (user) {
-      Object.assign(user, userData);
-    } else {
+  async update(id: number, userData: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+    const updatedUser = this.userRepository.merge(user, userData);
+    return this.userRepository.save(updatedUser);
+  }
+
+  async delete(id: number): Promise<{ deleted: boolean }> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
+    return { deleted: true };
+  }
+
+  private async findOne(id: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
     return user;
   }
 
-  delete(id: number): { deleted: boolean } {
-    const position = this.findOne(id);
-    this.users.splice(position, 1);
-    return { deleted: true };
-  }
-
-  private findOne(id: number): number {
-    const position = this.users.findIndex((user) => user.id === id);
-    if (position === -1) {
-      throw new NotFoundException(`User with id ${id} not found`);
+  private async findOneByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
     }
-    return position;
+    return user;
   }
 }
