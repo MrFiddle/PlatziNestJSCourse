@@ -15,18 +15,18 @@ export class UsersController {
   }
 
   @Post()
-  createUser(@Body() userData: CreateUserDto): Promise<User> {
+  createUser(@Body() userData: CreateUserDto) {
     return this.usersService.create(userData);
   }
 
   @Get(':id')
-  getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
+  getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getUserById(Number(id));
   }
 
   @Put(':id')
-  updateUser(@Param('id', ParseIntPipe) id: number, @Body() userData: Omit<UpdateUserDto, 'id'>): Promise<User> {
-    return this.usersService.update(Number(id), userData);
+  updateUser(@Param('id', ParseIntPipe) id: number, @Body() userData: UpdateUserDto) {
+    return this.usersService.update(id, userData);
   }
 
   @Delete(':id')
@@ -35,7 +35,7 @@ export class UsersController {
   }
 
   @Get('email/:email')
-  getUserByEmail(@Param('email') email: string): Promise<User> {
+  getUserByEmail(@Param('email') email: string) {
     return this.usersService.getUserByEmail(email);
   }
 
