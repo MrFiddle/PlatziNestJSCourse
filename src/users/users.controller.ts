@@ -1,15 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Patch } from '@nestjs/common';
+import { CreateUserDto } from './dto/user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
+import { UserResponseDto } from './dto/user.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  getUsers(): Promise<User[]> {
+  getUsers(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
   }
 
@@ -19,7 +20,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
     return this.usersService.getUserById(Number(id));
   }
 
@@ -36,5 +37,15 @@ export class UsersController {
   @Get('email/:email')
   getUserByEmail(@Param('email') email: string): Promise<User> {
     return this.usersService.getUserByEmail(email);
+  }
+
+  @Get(':id/profile')
+  getProfileByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getProfileByUserId(Number(id));
+  }
+
+  @Get(':id/short-profile')
+  getShortProfileByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getShortProfileByUserId(Number(id));
   }
 }

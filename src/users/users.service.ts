@@ -1,9 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { UserResponseDto } from './dto/user.dto';
+import { plainToInstance } from 'class-transformer';
+import { AnyShort } from 'src/interfaces/AnyShort';
 
 @Injectable()
 export class UsersService {
@@ -13,17 +16,46 @@ export class UsersService {
     private dataSource: DataSource,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    const users = await this.userRepository.find();
-    return users;
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.find({
+      relations: ['profile'],
+    });
+    return plainToInstance(UserResponseDto, users, { excludeExtraneousValues: true });
   }
 
-  async getUserById(id: number): Promise<User> {
-    const user = await this.findOne(id);
-    if (user.id === 1) {
-      throw new ForbiddenException('Access to this user is forbidden');
+  async getUserById(id: number): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
     }
-    return user;
+    return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
+  }
+
+  async getProfileByUserId(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return user.profile;
+  }
+
+  async getShortProfileByUserId(id: number): Promise<AnyShort> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['profile'],
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    const profile = user.profile;
+    const response: AnyShort = { id: profile.id, name: profile.name };
+    return response;
   }
 
   async getUserByEmail(email: string): Promise<User> {

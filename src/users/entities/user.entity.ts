@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Profile } from 'src/profiles/entities/profile.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity({
   name: 'users',
@@ -28,4 +29,8 @@ export class User {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   }) // Auto-updates on modification
   updated_at: Date;
+
+  @OneToOne(() => Profile, { nullable: false, cascade: true })
+  @JoinColumn({ name: 'profile_id' })
+  profile: Profile;
 }

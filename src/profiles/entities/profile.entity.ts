@@ -15,7 +15,7 @@ export class Profile {
   last_name: string;
 
   @Column({ type: 'varchar', nullable: true })
-  avatar: string | null;
+  avatar?: string | null;
 
   @CreateDateColumn({
     type: 'timestamp',
