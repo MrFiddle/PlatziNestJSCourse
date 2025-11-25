@@ -8,9 +8,6 @@ export class User {
   @PrimaryGeneratedColumn() // Auto-increments ID as primary key
   id: number;
 
-  @Column({ type: 'varchar', length: 100 }) // Specifies column type and constraints
-  name: string;
-
   @Column({ type: 'varchar', length: 255, unique: true }) // Ensures unique emails
   email: string;
 

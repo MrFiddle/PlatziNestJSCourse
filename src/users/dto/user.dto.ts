@@ -2,7 +2,7 @@ import { Expose, Transform, Type } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
 import { CreateProfileDto } from './profile.dto';
 import { UpdateProfileDto } from './profile.dto';
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 
 export class UserResponseDto {
   @Expose()
@@ -21,10 +21,6 @@ export class UserResponseDto {
 }
 
 export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
   @IsNotEmpty()
   @IsEmail()
   email: string;
@@ -40,4 +36,9 @@ export class CreateUserDto {
   profile: CreateProfileDto;
 }
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['profile'])) {
+  @ValidateNested()
+  @Type(() => UpdateProfileDto)
+  @IsOptional()
+  profile: UpdateProfileDto;
+}

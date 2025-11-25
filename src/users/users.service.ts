@@ -81,10 +81,11 @@ export class UsersService {
     }
   }
 
-  async update(id: number, userData: UpdateUserDto): Promise<User> {
+  async update(id: number, userData: UpdateUserDto) {
     const user = await this.findOne(id);
     const updatedUser = this.userRepository.merge(user, userData);
-    return this.userRepository.save(updatedUser);
+    const savedUser = await this.userRepository.save(updatedUser);
+    return savedUser;
   }
 
   async delete(id: number): Promise<{ deleted: boolean }> {
@@ -94,7 +95,7 @@ export class UsersService {
   }
 
   private async findOne(id: number): Promise<User> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({ where: { id }, relations: ['profile'] });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
