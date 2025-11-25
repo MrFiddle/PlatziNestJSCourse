@@ -36,7 +36,7 @@ export class CreateUserDto {
   profile: CreateProfileDto;
 }
 
-export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['profile'])) {
+export class UpdateUserDto extends PartialType(OmitType(CreateUserDto, ['profile', 'password'])) {
   @ValidateNested()
   @Type(() => UpdateProfileDto)
   @IsOptional()

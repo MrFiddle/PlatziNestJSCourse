@@ -23,15 +23,12 @@ export class UsersService {
     return plainToInstance(UserResponseDto, users, { excludeExtraneousValues: true });
   }
 
-  async getUserById(id: number): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-      relations: ['profile'],
-    });
+  async getUserById(id: number) {
+    const user = await this.findOne(id);
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    return plainToInstance(UserResponseDto, user, { excludeExtraneousValues: true });
+    return user;
   }
 
   async getProfileByUserId(id: number) {
@@ -63,10 +60,14 @@ export class UsersService {
     return user;
   }
 
-  async create(userData: CreateUserDto): Promise<User> {
+  async create(userData: CreateUserDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
+    if (await this.userRepository.findOneBy({ email: userData.email })) {
+      throw new ForbiddenException('Email already in use');
+    }
 
     try {
       const newUser = await queryRunner.manager.save(User, userData);
@@ -82,16 +83,26 @@ export class UsersService {
   }
 
   async update(id: number, userData: UpdateUserDto) {
-    const user = await this.findOne(id);
-    const updatedUser = this.userRepository.merge(user, userData);
-    const savedUser = await this.userRepository.save(updatedUser);
-    return savedUser;
+    if (userData.email && (await this.userRepository.findOneBy({ email: userData.email }))) {
+      throw new ForbiddenException('Email already in use');
+    }
+    try {
+      const user = await this.findOne(id);
+      const updatedUser = this.userRepository.merge(user, userData);
+      const savedUser = await this.userRepository.save(updatedUser);
+      return savedUser;
+    } catch {
+      throw new BadRequestException('Failed to update user');
+    }
   }
 
   async delete(id: number): Promise<{ deleted: boolean }> {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
-    return { deleted: true };
+    try {
+      await this.userRepository.delete(id);
+      return { deleted: true };
+    } catch {
+      throw new BadRequestException('Failed to delete user');
+    }
   }
 
   private async findOne(id: number): Promise<User> {
