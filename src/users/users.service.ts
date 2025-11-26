@@ -7,12 +7,16 @@ import { DataSource, Repository } from 'typeorm';
 import { UserResponseDto } from './dto/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { AnyShort } from 'src/interfaces/AnyShort';
+import { Post } from 'src/posts/entities/post.entity';
+import { ShortPostResponseDto } from 'src/posts/dto/short-post-response.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
     private dataSource: DataSource,
   ) {}
 
@@ -53,6 +57,18 @@ export class UsersService {
     const profile = user.profile;
     const response: AnyShort = { id: profile.id, name: profile.name };
     return response;
+  }
+
+  async getPostsByUserId(id: number): Promise<ShortPostResponseDto[]> {
+    // First, check if the user exists
+    await this.getUserById(id); // This will throw if user not found
+
+    const posts = await this.postRepository.find({
+      where: { user: { id } },
+      relations: ['user.profile'],
+    });
+
+    return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
   }
 
   async getUserByEmail(email: string): Promise<User> {

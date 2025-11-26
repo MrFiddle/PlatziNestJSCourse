@@ -24,6 +24,11 @@ export class UsersController {
     return this.usersService.getUserById(Number(id));
   }
 
+  @Get(':id/posts')
+  getPostsByUserId(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getPostsByUserId(Number(id));
+  }
+
   @Put(':id')
   updateUser(@Param('id', ParseIntPipe) id: number, @Body() userData: UpdateUserDto) {
     return this.usersService.update(id, userData);
