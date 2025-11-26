@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Post } from './entities/post.entity';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { Post } from '../entities/post.entity';
+import { CreatePostDto } from '../dto/create-post.dto';
+import { UpdatePostDto } from '../dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { ShortPostResponseDto } from './dto/short-post-response.dto';
+import { ShortPostResponseDto } from '../dto/short-post-response.dto';
 import { UserResponseDto } from 'src/users/dto/user.dto';
 
 @Injectable()
