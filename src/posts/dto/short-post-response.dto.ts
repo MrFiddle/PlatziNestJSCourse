@@ -1,4 +1,5 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { UserResponseDto } from 'src/users/dto/user.dto';
 
 export class ShortPostResponseDto {
   @Expose()
@@ -15,4 +16,8 @@ export class ShortPostResponseDto {
 
   @Expose()
   created_at: Date;
+
+  @Expose()
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
 }

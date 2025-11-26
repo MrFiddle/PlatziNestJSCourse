@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { ShortPostResponseDto } from './dto/short-post-response.dto';
+import { UserResponseDto } from 'src/users/dto/user.dto';
 
 @Injectable()
 export class PostsService {
@@ -21,10 +22,18 @@ export class PostsService {
     await queryRunner.startTransaction();
 
     try {
-      const newPost = await queryRunner.manager.save(Post, createPostDto);
+      const newPost = await queryRunner.manager.save(Post, {
+        ...createPostDto,
+        user: { id: createPostDto.user_id },
+      });
       await queryRunner.commitTransaction();
-      return newPost;
+      const post = await this.findOne(newPost.id);
+      return {
+        ...post,
+        user: plainToInstance(UserResponseDto, post.user, { excludeExtraneousValues: true }),
+      };
     } catch (error) {
+      console.error(error);
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('Failed to create post');
     } finally {
@@ -33,12 +42,17 @@ export class PostsService {
   }
 
   async findAll() {
-    const posts = await this.postRepository.find();
+    const posts = await this.postRepository.find({
+      relations: ['user.profile'],
+    });
     return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
   }
 
   async findOne(id: number) {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user.profile'],
+    });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);
     }

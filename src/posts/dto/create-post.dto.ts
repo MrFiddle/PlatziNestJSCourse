@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -15,4 +15,8 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   summary?: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  user_id: number;
 }
