@@ -1,5 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-// import { Post } from './post.entity';
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Post } from './post.entity';
 
 @Entity({
   name: 'categories',
@@ -23,4 +23,7 @@ export class Category {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updated_at: Date;
+
+  @ManyToMany(() => Post, (post) => post.categories)
+  posts: Post[];
 }

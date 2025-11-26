@@ -1,4 +1,5 @@
 import { Expose, Type } from 'class-transformer';
+import { AnyShort } from 'src/general_dtos/AnyShort';
 import { UserResponseDto } from 'src/users/dto/user.dto';
 
 export class ShortPostResponseDto {
@@ -20,4 +21,8 @@ export class ShortPostResponseDto {
   @Expose()
   @Type(() => UserResponseDto)
   user: UserResponseDto;
+
+  @Expose()
+  @Type(() => AnyShort)
+  categories: AnyShort[];
 }

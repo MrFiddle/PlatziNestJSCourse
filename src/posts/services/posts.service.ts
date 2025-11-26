@@ -25,6 +25,7 @@ export class PostsService {
       const newPost = await queryRunner.manager.save(Post, {
         ...createPostDto,
         user: { id: createPostDto.user_id },
+        categories: createPostDto.category_ids?.map((id) => ({ id })),
       });
       await queryRunner.commitTransaction();
       const post = await this.findOne(newPost.id);
@@ -43,7 +44,7 @@ export class PostsService {
 
   async findAll() {
     const posts = await this.postRepository.find({
-      relations: ['user.profile'],
+      relations: ['user.profile', 'categories'],
     });
     return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
   }
@@ -51,7 +52,7 @@ export class PostsService {
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['user.profile'],
+      relations: ['user.profile', 'categories'],
     });
     if (!post) {
       throw new NotFoundException(`Post with id ${id} not found`);

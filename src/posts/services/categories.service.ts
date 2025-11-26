@@ -4,12 +4,18 @@ import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+import { AnyShort } from 'src/general_dtos/AnyShort';
+import { Post } from '../entities/post.entity';
+import { ShortPostResponseDto } from '../dto/short-post-response.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    @InjectRepository(Post)
+    private postRepository: Repository<Post>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -22,7 +28,8 @@ export class CategoriesService {
   }
 
   async findAll() {
-    return await this.categoryRepository.find();
+    const categories = await this.categoryRepository.find();
+    return plainToInstance(AnyShort, categories, { excludeExtraneousValues: true });
   }
 
   async findOne(id: number) {
@@ -31,6 +38,17 @@ export class CategoriesService {
       throw new NotFoundException(`Category with id ${id} not found`);
     }
     return category;
+  }
+
+  async findPostsByCategory(id: number) {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: ['posts', 'posts.user', 'posts.categories', 'posts.user.profile'],
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with id ${id} not found`);
+    }
+    return plainToInstance(ShortPostResponseDto, category.posts, { excludeExtraneousValues: true });
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {

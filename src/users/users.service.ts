@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { UserResponseDto } from './dto/user.dto';
 import { plainToInstance } from 'class-transformer';
-import { AnyShort } from 'src/interfaces/AnyShort';
+import { AnyShort } from 'src/general_dtos/AnyShort';
 import { Post } from 'src/posts/entities/post.entity';
 import { ShortPostResponseDto } from 'src/posts/dto/short-post-response.dto';
 
