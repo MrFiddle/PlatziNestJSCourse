@@ -36,7 +36,7 @@ export class Post {
   }) // Auto-updates on modification
   updated_at: Date;
 
-  // @ManyToOne(() => User, { nullable: false })
-  // @JoinColumn({ name: 'author_id' })
-  // author: User;
+  @ManyToOne(() => User, (user) => user.posts, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

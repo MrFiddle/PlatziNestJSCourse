@@ -1,5 +1,6 @@
+import { Post } from 'src/posts/entities/post.entity';
 import { Profile } from 'src/profiles/entities/profile.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity({
   name: 'users',
@@ -30,4 +31,7 @@ export class User {
   @OneToOne(() => Profile, { nullable: false, cascade: true })
   @JoinColumn({ name: 'profile_id' })
   profile: Profile;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 }
