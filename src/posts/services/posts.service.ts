@@ -49,6 +49,18 @@ export class PostsService {
     return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
   }
 
+  async getPostsByCategory(categoryId: number) {
+    const posts = await this.postRepository.createQueryBuilder('post').leftJoinAndSelect('post.categories', 'category').leftJoinAndSelect('post.user', 'user').leftJoinAndSelect('user.profile', 'profile').where('category.id = :categoryId', { categoryId }).getMany();
+
+    return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
+
+    // const posts = await this.postRepository.find({
+    //   where: { categories: { id: categoryId } },
+    //   relations: ['user.profile', 'categories'],
+    // });
+    // return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
+  }
+
   async findOne(id: number) {
     const post = await this.postRepository.findOne({
       where: { id },

@@ -2,11 +2,14 @@ import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe } from '@
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { PostsService } from '../services/posts.service';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
-
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly postsService: PostsService,
+  ) {}
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
@@ -24,7 +27,7 @@ export class CategoriesController {
 
   @Get(':id/posts')
   findPostsByCategory(@Param('id', ParseIntPipe) id: number) {
-    return this.categoriesService.findPostsByCategory(id);
+    return this.postsService.getPostsByCategory(id);
   }
 
   @Put(':id')

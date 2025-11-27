@@ -40,17 +40,6 @@ export class CategoriesService {
     return category;
   }
 
-  async findPostsByCategory(id: number) {
-    const category = await this.categoryRepository.findOne({
-      where: { id },
-      relations: ['posts', 'posts.user', 'posts.categories', 'posts.user.profile'],
-    });
-    if (!category) {
-      throw new NotFoundException(`Category with id ${id} not found`);
-    }
-    return plainToInstance(ShortPostResponseDto, category.posts, { excludeExtraneousValues: true });
-  }
-
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     try {
       const category = await this.findOne(id);
