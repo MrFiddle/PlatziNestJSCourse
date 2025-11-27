@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { Exclude } from 'class-transformer';
 import { Post } from 'src/posts/entities/post.entity';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany, BeforeInsert } from 'typeorm';
@@ -13,7 +14,8 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true }) // Ensures unique emails
   email: string;
 
-  @Column({ type: 'varchar', length: 255, select: false }) // Excludes password from queries by default
+  @Column({ type: 'varchar', length: 255 }) // Excludes password from queries by default
+  @Exclude()
   password: string;
 
   @CreateDateColumn({
