@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Post } from '../entities/post.entity';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
@@ -8,6 +8,8 @@ import { plainToInstance } from 'class-transformer';
 import { ShortPostResponseDto } from '../dto/short-post-response.dto';
 import { UserResponseDto } from 'src/users/dto/user.dto';
 import { type JWTPayload } from 'src/auth/models/payload.model';
+import { OpenaiService } from 'src/ai/services/openai.service';
+import { PostPublishResponse } from '../models/PublishResponse';
 
 @Injectable()
 export class PostsService {
@@ -15,6 +17,7 @@ export class PostsService {
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
     private dataSource: DataSource,
+    private openaiService: OpenaiService,
   ) {}
 
   async create(createPostDto: CreatePostDto, jwtPayload: JWTPayload) {
@@ -81,6 +84,42 @@ export class PostsService {
       return savedPost;
     } catch {
       throw new BadRequestException('Failed to update post');
+    }
+  }
+
+  async publish(id: number, payload: JWTPayload) {
+    try {
+      const post = await this.findOne(id);
+      if (post.user.id !== payload.sub) {
+        throw new ForbiddenException('You are not authorized to publish this post');
+      }
+      if (!post.content || post.content.trim() === '' || !post.title || post.title.trim() === '' || post.categories.length === 0) {
+        throw new BadRequestException('Post must have title, content and at least one category to be published');
+      }
+
+      const summary = await this.openaiService.generateSummary(post.content);
+      const imageUrl = await this.openaiService.generateImage(post.summary);
+      const changes = this.postRepository.merge(post, {
+        is_draft: false,
+        summary: summary.data,
+        cover: imageUrl.data,
+      });
+      const updatedPost = await this.postRepository.save(changes);
+      const postRes = await this.findOne(updatedPost.id);
+
+      // Filter out successful responses, keeping only those with errors
+      const errors = [summary, imageUrl].filter((item) => item.error);
+      const res: PostPublishResponse = {
+        post: postRes,
+        ...(errors.length > 0 && { OpenAIResponse: errors }),
+      };
+      return res;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw the specific NotFoundException
+      }
+      console.error(error);
+      throw new BadRequestException('Failed to publish post');
     }
   }
 

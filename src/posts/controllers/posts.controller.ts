@@ -35,6 +35,12 @@ export class PostsController {
     return this.postsService.update(id, updatePostDto);
   }
 
+  @Put(':id/publish')
+  publish(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    const payload = req.user as JWTPayload;
+    return this.postsService.publish(id, payload);
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.delete(id);
