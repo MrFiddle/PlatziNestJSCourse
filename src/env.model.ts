@@ -5,4 +5,5 @@ export interface Env {
   MYSQL_USER: string;
   MYSQL_PASSWORD: string;
   MYSQL_DB: string;
+  JWT_SECRET: string;
 }
