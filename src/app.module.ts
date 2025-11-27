@@ -19,7 +19,7 @@ import { PostsModule } from './posts/posts.module';
         password: configService.get('MYSQL_PASSWORD', { infer: true }),
         database: configService.get('MYSQL_DB', { infer: true }),
         autoLoadEntities: true,
-        synchronize: true, // Note: set to false in production
+        synchronize: false, // Note: set to false in production
       }),
       imports: [ConfigModule],
       inject: [ConfigService],
