@@ -86,10 +86,10 @@ export class UsersService {
     }
 
     try {
-      const newUser = await queryRunner.manager.save(User, userData);
+      const newUser = await queryRunner.manager.create(User, userData);
+      const savedUser = await queryRunner.manager.save(User, newUser);
       await queryRunner.commitTransaction();
-      const { password, ...result } = newUser;
-      return result as User;
+      return this.findOne(savedUser.id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('Failed to create user');
