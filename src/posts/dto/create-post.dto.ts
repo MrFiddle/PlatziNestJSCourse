@@ -20,8 +20,4 @@ export class CreatePostDto {
   @IsNumber({}, { each: true })
   @IsOptional()
   category_ids?: number[];
-
-  @IsNumber()
-  @IsNotEmpty()
-  user_id: number;
 }

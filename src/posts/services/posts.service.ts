@@ -7,6 +7,7 @@ import { DataSource, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { ShortPostResponseDto } from '../dto/short-post-response.dto';
 import { UserResponseDto } from 'src/users/dto/user.dto';
+import { type JWTPayload } from 'src/auth/models/payload.model';
 
 @Injectable()
 export class PostsService {
@@ -16,7 +17,7 @@ export class PostsService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createPostDto: CreatePostDto) {
+  async create(createPostDto: CreatePostDto, jwtPayload: JWTPayload) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -24,7 +25,7 @@ export class PostsService {
     try {
       const newPost = await queryRunner.manager.save(Post, {
         ...createPostDto,
-        user: { id: createPostDto.user_id },
+        user: { id: jwtPayload.sub },
         categories: createPostDto.category_ids?.map((id) => ({ id })),
       });
       await queryRunner.commitTransaction();
