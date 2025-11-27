@@ -16,7 +16,7 @@ export class Post {
   @Column({ type: 'text', nullable: true }) // Content of the blog post
   content: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true }) // Optional cover image URL
+  @Column({ type: 'varchar', length: 900, nullable: true }) // Optional cover image URL
   cover: string;
 
   @Column({ type: 'varchar', length: 500, nullable: true }) // Optional brief
