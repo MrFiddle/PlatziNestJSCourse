@@ -71,7 +71,7 @@ export class UsersService {
     return plainToInstance(ShortPostResponseDto, posts, { excludeExtraneousValues: true });
   }
 
-  async getUserByEmail(email: string): Promise<User> {
+  async getUserByEmail(email: string) {
     const user = await this.findOneByEmail(email);
     return user;
   }
@@ -129,11 +129,8 @@ export class UsersService {
     return user;
   }
 
-  private async findOneByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ email });
-    if (!user) {
-      throw new NotFoundException(`User with email ${email} not found`);
-    }
+  private async findOneByEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
     return user;
   }
 }
