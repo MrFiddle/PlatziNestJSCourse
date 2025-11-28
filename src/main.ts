@@ -17,12 +17,14 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder().setTitle('Blog API').setDescription('Blog API Description').setVersion('1.0').build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory, {
-    jsonDocumentUrl: 'swagger-json',
-    yamlDocumentUrl: 'swagger-yaml',
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder().setTitle('Blog API').setDescription('Blog API Description').setVersion('1.0').build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, documentFactory, {
+      jsonDocumentUrl: 'swagger-json',
+      yamlDocumentUrl: 'swagger-yaml',
+    });
+  }
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   await app.listen(process.env.PORT ?? 3000);
