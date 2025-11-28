@@ -9,6 +9,7 @@ import { AnyShort } from 'src/general_dtos/AnyShort';
 import { ShortPostResponseDto } from 'src/posts/dto/short-post-response.dto';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { User } from './entities/user.entity';
+import { Public } from 'src/common/decorators';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -23,6 +24,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Public()
   @ApiResponse({ status: 201, description: 'User created successfully', type: UserResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
