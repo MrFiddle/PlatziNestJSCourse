@@ -1,10 +1,17 @@
+import helmet from 'helmet';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+// somewhere in your initialization file
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: ['https://www.assetify.digital/', 'http://localhost:5173/'],
+  });
+  app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
